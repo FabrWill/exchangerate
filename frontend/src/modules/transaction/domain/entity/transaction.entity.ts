@@ -6,4 +6,5 @@ export default class Transaction {
   base_rate: number;
   conversion_result: number;
   last_update: string;
+  errors: string;
 }
