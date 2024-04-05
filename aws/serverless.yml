@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "Template for serverless function tests"
+
+Globals:
+  Function:
+    Timeout: 120
+    MemorySize: 256
+    CodeUri: src/
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+
+Resources:
+  CreateUserSyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: create-user.handler
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /createUser
+            Method: post
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+          - lambdas/create-user.js
+
+  ProcessMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: process-message.handler
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt MyQueue.Arn
+            BatchSize: 10
+      Policies:
+        - AmazonSQSFullAccess
+        - AmazonEventBridgeFullAccess
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+          - lambdas/process-message.js
+
+  MessageQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MessageQueue
+
+  EventBridgeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SendToEventBridge
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: events:PutEvents
+                Resource: "*"
+
+Outputs:
+  CreateUserSyncApi:
+    Description: "URL of the API for createUser sync function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/createUser"
