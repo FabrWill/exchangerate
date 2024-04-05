@@ -5,12 +5,12 @@ export class TransactionDto {
   @IsString()
   @IsISO4217CurrencyCode({ message: "Código da Moeda inválido" })
   @IsNotIn(["XXX", "KPW"], { message: "Código da Moeda inválido" })
-  to: string;
+  from: string;
 
   @IsString()
   @IsISO4217CurrencyCode({ message: "Código da Moeda inválido" })
   @IsNotIn(["XXX", "KPW"], { message: "Código da Moeda inválido" })
-  from: string;
+  to: string;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 2, allowInfinity: false, allowNaN: false })

@@ -6,7 +6,7 @@ import { TransactionDto } from "../domain/dto/transaction.dto";
 export class TransactionController {
   constructor(@Inject(TransactionService) private transactionService: TransactionService) {}
 
-  @Get(":to/:from/:amount")
+  @Get(":from/:to/:amount")
   async getConversion(@Param() transaction: TransactionDto) {
     const data = this.transactionService.getTransaction(transaction);
 
