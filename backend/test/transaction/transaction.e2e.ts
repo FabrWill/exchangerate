@@ -14,8 +14,8 @@ describe("ExchangeController (e2e)", () => {
       .get("/transaction/USD/EUR/100")
       .expect(200)
       .expect(res => {
-        expect(res.body).toHaveProperty("result");
-        expect(res.body.result).toHaveProperty("from");
+        expect(res.body).toHaveProperty("conversion_result");
+        expect(res.body).toHaveProperty("from");
       });
   });
 
