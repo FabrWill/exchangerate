@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class ApplicationConfigService {
@@ -7,14 +7,14 @@ export class ApplicationConfigService {
 
   get exchangeRateApi() {
     return {
-      key: this.config.get('EXCHANGE_RATE_API_KEY'),
-      url: this.config.get('EXCHANGE_RATE_BASE_URL'),
+      key: this.config.get("EXCHANGE_RATE_API_KEY"),
+      url: this.config.get("EXCHANGE_RATE_BASE_URL"),
     };
   }
   get setting() {
     return {
-      env: this.config.get('NODE_ENV'),
-      port: this.config.get('APP_PORT'),
+      env: this.config.get("NODE_ENV"),
+      port: this.config.get("APP_PORT"),
     };
   }
 }
