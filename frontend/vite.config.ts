@@ -8,4 +8,8 @@ export default defineConfig({
   resolve: {
     alias: [{ find: '@', replacement: path.resolve(__dirname, 'src') }],
   },
+  server: {
+    port: 8080,
+    host: true,
+  }
 })

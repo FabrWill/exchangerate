@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  react-app:
+    image: node:20
+    container_name: react-app
+    working_dir: /exchange-frontend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - VITE_APP_API_URL=http://localhost:3000/
+    volumes:
+      - ./frontend/:/exchange-frontend
+    command: bash -c "npm i -f && npm run start"
+    links:
+      - nest-app
+
+  nest-app:
+    image: node:20
+    container_name: nest-app
+    restart: always
+    working_dir: /exchange-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - EXCHANGE_RATE_BASE_URL=https://v6.exchangerate-api.com/v6
+      - PORT=3000
+    volumes:
+      - ./backend:/exchange-backend
+    command: bash -c "npm install && npm run start:dev"
