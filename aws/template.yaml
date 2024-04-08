@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  aws
+  Creating user and adding it to a sqs for get a email notification
+Globals:
+  Function:
+    Timeout: 3
+    Runtime: nodejs20.x
+    LoggingConfig:
+      LogFormat: JSON
+Resources:
+  Table:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+  CreateUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/lambdas/
+      Handler: create-user.handler
+      MemorySize: 256
+      Events:
+        CreateUserApi:
+          Type: Api
+          Properties:
+            Path: /createUser
+            Method: post
+      Environment:
+        Variables:
+          TABLE_NAME: '!Ref Table'
+          USERWELCOMEQUEUE_QUEUE_NAME: !GetAtt UserWelcomeQueue.QueueName
+          USERWELCOMEQUEUE_QUEUE_ARN: !GetAtt UserWelcomeQueue.Arn
+          USERWELCOMEQUEUE_QUEUE_URL: !Ref UserWelcomeQueue
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref Table
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt UserWelcomeQueue.QueueName
+  UserWelcomeQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 345600
+  SendUserEmail:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/lambdas/
+      Handler: send-user-welcome-email.handler
+      MemorySize: 256
+      Events:
+        UserWelcomeQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt UserWelcomeQueue.Arn
+            BatchSize: 1
+Outputs:
+  CreateUserApi:
+    Description: API Gateway endpoint URL for Prod stage for Create User function
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/users
+  CreateUserFunction:
+    Description: Create User Lambda Function ARN
+    Value: !GetAtt CreateUserFunction.Arn
+  CreateTable:
+    Description: DynamoDB table name
+    Value: !GetAtt Table.Arn
